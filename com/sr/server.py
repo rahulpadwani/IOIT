@@ -17,14 +17,20 @@ class ClientThread(Thread):
         print (" New thread started for "+ip+":"+str(port))
 
     def run(self):
-        # filename='mytext.txt'
-        # msg='hi'
-        # msg=msg.encode('utf-8')
-        # self.sock.send(msg)
-        msg=self.sock.recv(BUFFER_SIZE)
-        msg=msg.decode('utf-8')
-        if(msg=='1'):
-            self.send_img()
+        self.communicate()
+
+    def communicate(self):
+        msg=''
+        while msg != '4':
+            menu="1:-find person\n2:-set data\n3:-get data\n4:-quit"
+            msg=menu.encode('utf-8')
+            self.sock.send(msg)
+            msg=self.sock.recv(BUFFER_SIZE)
+            msg=msg.decode('utf-8')
+            print(msg)
+            # call functions here---
+        self.sock.close()
+
     def send_img(self):
         filename='img.jpg'
         f = open(filename,'rb')
@@ -36,8 +42,21 @@ class ClientThread(Thread):
                 l = f.read(BUFFER_SIZE)
             if not l:
                 f.close()
-                self.sock.close()
+                # self.sock.close()
                 break
+    def get_img(self):
+        with open('received_file.jpg', 'wb') as f:
+            print ('file opened')
+            while True:
+                #print('receiving data...')
+                data = self.sock.recv(BUFFER_SIZE)
+                # print('data=%s', (data))
+                if not data:
+                    f.close()
+                    print ('file close()')
+                    break
+                # write data to a file
+                f.write(data)
 
 
 tcpsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
