@@ -1,0 +1,5 @@
+#1>prg to transfer imgs
+#2>add communication
+-3>make it a service prg
+4>add service users
+5>test the whole thing
