@@ -14,14 +14,16 @@ s.connect((TCP_IP, TCP_PORT))
 check=''
 while check != '4':
     msg = s.recv(BUFFER_SIZE)
-    # if msg == 'hi' :
     msg = msg.decode('utf-8')
     print(msg)
     response=input()
     check=response
     response=response.encode('utf-8')
     s.send(response)
-
+    msg = s.recv(BUFFER_SIZE)
+    msg = msg.decode('utf-8')
+    print(msg)
+    
 
 print('Successfully get the file')
 s.close()
