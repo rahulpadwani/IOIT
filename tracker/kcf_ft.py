@@ -46,14 +46,13 @@ if __name__ == '__main__' :
         print ('Cannot read video file')
         sys.exit()
 
+    # default value
     bbox = (287, 23, 86, 320)
 
-    # Uncomment the line below to select a different bounding box
-    # bbox = cv2.selectROI(frame, False)
+    # detectes face and generates a tracker for it
     # -----------------------------------------------
     tracker=face_detect(video)
     # -----------------------------------------------
-    # ok = tracker.init(frame, bbox)
     flag= False
     while True:
         # Read a new frame
@@ -91,9 +90,9 @@ if __name__ == '__main__' :
         # Display result
         cv2.imshow("Tracking", frame)
         if flag:
-            # bbox=
+            # use haar_cascade to find the face again
+            # and reset the tracker
             tracker=face_detect(video)
-            # ok = tracker.init(frame, bbox)
             flag= False
         # Exit if ESC pressed
         k = cv2.waitKey(1) & 0xff
