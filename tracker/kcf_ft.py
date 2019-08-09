@@ -5,26 +5,34 @@ import numpy as np
 def face_detect(video):
     face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
     flag = True
+    bbox = (287, 23, 86, 320)
+    tracker = cv2.TrackerKCF_create()
+    
+    
+    
     while flag:
         ok, frame = video.read()
         # cv2.imshow('img',frame)
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         faces = face_cascade.detectMultiScale(gray, 1.3, 5)
         for (x,y,w,h) in faces:
+            bbox=(x,y,w,h)
+            ok = tracker.init(frame, bbox)    
+            
             cv2.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2)
             roi_gray = gray[y:y+h, x:x+w]
             roi_color = frame[y:y+h, x:x+w]
-            flag = not flag
-            bbox=(x,y,w,h)
-        cv2.imshow('img',frame)
-        k = cv2.waitKey(30) & 0xff
+            flag = False
+            # break
+        cv2.imshow('face_detect',frame)
+        k = cv2.waitKey(1) & 0xff
     
             # k = cv2.waitKey(0)
-    return bbox
+    return tracker
 
 if __name__ == '__main__' :
     
-    tracker = cv2.TrackerKCF_create()
+    # tracker = cv2.TrackerKCF_create()
     video = cv2.VideoCapture(0)
 
     # Exit if video not opened.
@@ -43,10 +51,10 @@ if __name__ == '__main__' :
     # Uncomment the line below to select a different bounding box
     # bbox = cv2.selectROI(frame, False)
     # -----------------------------------------------
-    bbox = face_detect(video)
+    tracker=face_detect(video)
     # -----------------------------------------------
-    ok = tracker.init(frame, bbox)
- 
+    # ok = tracker.init(frame, bbox)
+    flag= False
     while True:
         # Read a new frame
         ok, frame = video.read()
@@ -72,7 +80,8 @@ if __name__ == '__main__' :
             # Tracking failure
             cv2.putText(frame, "Tracking failure detected", (100,80), cv2.FONT_HERSHEY_SIMPLEX, 0.75,(0,0,255),2)
             print("used ")
-            face_detect(video)
+            flag=True
+            
         # Display tracker type on frame
         cv2.putText(frame, "KCF_face_tracker" + " Tracker", (100,20), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (50,170,50),2)
      
@@ -81,7 +90,11 @@ if __name__ == '__main__' :
  
         # Display result
         cv2.imshow("Tracking", frame)
- 
+        if flag:
+            # bbox=
+            tracker=face_detect(video)
+            # ok = tracker.init(frame, bbox)
+            flag= False
         # Exit if ESC pressed
         k = cv2.waitKey(1) & 0xff
         if k == 27 : break
