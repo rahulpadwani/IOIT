@@ -21,7 +21,8 @@ class ClientThread(Thread):
 
     def communicate(self):
         msg=''
-        while msg != '4':
+        flag="connected"
+        while flag != "exit":
             menu="1:-find person\n2:-set data\n3:-get data\n4:-quit"
             msg=menu.encode('utf-8')
             self.sock.send(msg)
@@ -29,20 +30,46 @@ class ClientThread(Thread):
             msg=msg.decode('utf-8')
             print(msg)
             # call functions here---
+            if msg == '1':
+                response='finding person'
+                msg=response.encode('utf-8')
+                self.sock.send(msg)
+            elif msg =='2':
+                response='reciving data'
+                msg=response.encode('utf-8')
+                self.sock.send(msg)
+            elif msg =='3':
+                response='sending data'
+                msg=response.encode('utf-8')
+                self.sock.send(msg)
+                self.send_img()
+                flag="exit"
+            elif msg =='4':
+                response='closing connection'
+                msg=response.encode('utf-8')
+                self.sock.send(msg)
+                flag="exit"
+            else :
+                response='invalid'
+                msg=response.encode('utf-8')
+                self.sock.send(msg)
+                
+            
         self.sock.close()
 
     def send_img(self):
         filename='img.jpg'
         f = open(filename,'rb')
+        print ("file opened")
         while True:
             l = f.read(BUFFER_SIZE)
             while (l):
                 self.sock.send(l)
-                #print('Sent ',repr(l))
+                # print('Sent ',repr(l))
                 l = f.read(BUFFER_SIZE)
             if not l:
                 f.close()
-                # self.sock.close()
+                self.sock.close()
                 break
     def get_img(self):
         with open('received_file.jpg', 'wb') as f:
