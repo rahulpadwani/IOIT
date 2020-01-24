@@ -2,12 +2,16 @@ import cv2
 import sys
 import numpy as np
 import face_rec as fc
+
+
 def face_detect(video,pretraker,mode):
     """
     mode=> 1 for lost trackers
            2 for check for new faces
            3 lost some trackers
     """
+    global detected_people
+    global count
     face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
     # face_cascade = cv2.CascadeClassifier('haarcascade_fullbody.xml')
     flag = True
@@ -24,7 +28,12 @@ def face_detect(video,pretraker,mode):
                 p2 = (int(bbox[0] + bbox[2]), int(bbox[1] + bbox[3]))
                 roi_color = frame[p1[1]:p2[1],p1[0]:p2[0]]
                 name=fc.recognise(roi_color)
-                print(name)
+                if (len(name)>0):
+                   print(str(count)+":-"+str(name))
+                   if(str(name) not in detected_people):
+                      detected_people.append(str(name))
+                   count+=1
+                #print(name)
                 cv2.rectangle(frame, p1, p2, (0,0,0), -1, 1)
                 
                 
@@ -44,8 +53,14 @@ def face_detect(video,pretraker,mode):
             print(name)
             flag = False
             # break
+        line=""
+        for p in detected_people:
+           line = line +","+ str(p)
+        cv2.putText(frame, line, (100,50), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (50,170,50), 2)
         cv2.imshow('face_detect',frame)
         k = cv2.waitKey(1) & 0xff
+        # Exit if ESC pressed
+        if k == 27 : break
         if ((pretraker !=None and mode !=1) or mode==2)  :
             flag=False
             # k = cv2.waitKey(0)
@@ -60,8 +75,13 @@ def face_detect(video,pretraker,mode):
         return pretraker
 if __name__ == '__main__' :
     
+    global detected_people
+    global count
+    count=0
+    detected_people=[]
     # tracker = cv2.TrackerKCF_create()
-    video = cv2.VideoCapture(0)
+    #video = cv2.VideoCapture(0)
+    video = cv2.VideoCapture("http://192.168.43.21:8160")
 
     # Exit if video not opened.
     if not video.isOpened():
@@ -109,7 +129,12 @@ if __name__ == '__main__' :
                 cv2.rectangle(frame, p1, p2, (255,255,0), 3, 1)
                 roi_color = frame[p1[1]:p2[1],p1[0]:p2[0]]
                 name=fc.recognise(roi_color)
-                print(name)
+                if (len(name)>0):
+                   print(str(count)+":-"+str(name))
+                   if(str(name) not in detected_people):
+                      detected_people.append(str(name))
+                   count+=1
+                #print(name)
         if len(bboxes)==0 :
             # Tracking failure
             cv2.putText(frame, "Tracking failure detected", (100,80), cv2.FONT_HERSHEY_SIMPLEX, 0.75,(0,0,255),2)
@@ -123,8 +148,12 @@ if __name__ == '__main__' :
         cv2.putText(frame, "KCF_face_tracker" + " Tracker", (100,20), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (50,170,50),2)
      
         # Display FPS on frame
-        cv2.putText(frame, "FPS : " + str(int(fps)), (100,50), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (50,170,50), 2)
- 
+        #cv2.putText(frame, "FPS : " + str(int(fps)), (100,50), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (50,170,50), 2)
+        
+        line=""
+        for p in detected_people:
+           line = line +","+ str(p)
+        cv2.putText(frame, line, (100,50), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (50,170,50), 2)
         # Display result
         cv2.imshow("Tracking", frame)
         if flag:
